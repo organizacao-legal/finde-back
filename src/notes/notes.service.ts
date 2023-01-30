@@ -25,11 +25,15 @@ export class NotesService {
 
   async addReply(noteId: string, createNoteDTO: CreateNoteDTO) : Promise<Note>{
     const reply = newNote(createNoteDTO)
-    // let note = (await this.noteModel.findById(noteId).exec())
-
+    
     return this.noteModel.findByIdAndUpdate(noteId, {
        $push: {replies: reply}
     })
   }
 
+  async addUpvote(noteId: string) : Promise<Note> {
+    return this.noteModel.findByIdAndUpdate(noteId, {
+      $inc: {upvotes: 1 }
+   })
+  }
 }

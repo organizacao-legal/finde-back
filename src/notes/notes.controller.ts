@@ -34,7 +34,11 @@ export class NotesController {
     if(note == null) {
         throw new BadRequestException('Could not find a note with this id')
     }
-
+    
+    if (createNoteDTO.upvote !== null) {
+      this.notesService.addUpvote(id)
+    }
+    
     this.notesService.addReply(id, createNoteDTO);
   }
 }
