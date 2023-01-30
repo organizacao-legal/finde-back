@@ -5,13 +5,11 @@ export type NoteDocument = mongoose.HydratedDocument<Note>
 
 @Schema()
 export class Note {
-   
-
     @Prop()
     content: string;
 
-    @Prop()
-    created_at: number;
+    @Prop({ type: Date, expires: 86400, default: Date.now })
+    created_at: Date;
 
     @Prop()
     upvotes: number;

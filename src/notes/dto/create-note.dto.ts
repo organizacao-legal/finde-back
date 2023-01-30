@@ -12,7 +12,7 @@ export class CreateNoteDTO {
 export function newNote(createNoteDTO: CreateNoteDTO): Note {
   return {
     content: createNoteDTO.content,
-    created_at: Date.now(),
+    created_at: new Date,
     upvotes: 0,
     replies: [],
   };
