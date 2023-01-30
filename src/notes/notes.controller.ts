@@ -1,7 +1,6 @@
-import { BadRequestException, Body, Controller, Delete, Get, Param, ParseUUIDPipe, Post, Put } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common';
 import { CreateNoteDTO } from './dto/create-note.dto';
-import { EditNoteDTO } from './dto/edit-note.dto';
-import { Note } from './interfaces/note.interface';
+import { Note } from './schemas/note.schema';
 import { NotesService } from './notes.service';
 
 @Controller('notes')
@@ -14,29 +13,28 @@ export class NotesController {
   }
 
   @Get(':id')
-  async findOnde(@Param('id', new ParseUUIDPipe()) id: string): Promise<Note> {
+  async findOnde(@Param('id') id: string): Promise<Note> {
     var note = this.notesService.findOne(id);
 
     if(note == null) {
         throw new BadRequestException('Could not find a note with this id')
     }
-
     return note;
   }
 
   @Post()
-  async create(@Body() createNoteDTO: CreateNoteDTO) {
-    this.notesService.create(createNoteDTO);
+  async create(@Body() createNoteDTO: CreateNoteDTO): Promise<Note> {
+    return this.notesService.create(createNoteDTO);
   }
 
   @Put(':id')
-  async update(@Param('id', new ParseUUIDPipe()) id: string, @Body() editNoteDto: EditNoteDTO) {
+  async update(@Param('id') id: string, @Body() createNoteDTO: CreateNoteDTO) {
     var note = this.notesService.findOne(id);
 
     if(note == null) {
         throw new BadRequestException('Could not find a note with this id')
     }
 
-    this.notesService.addReply(id, editNoteDto);
+    this.notesService.addReply(id, createNoteDTO);
   }
 }

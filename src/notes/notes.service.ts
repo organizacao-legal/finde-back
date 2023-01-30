@@ -1,43 +1,35 @@
 import { Injectable } from '@nestjs/common';
-import { randomUUID } from 'crypto';
-import { CreateNoteDTO } from './dto/create-note.dto';
-import { EditNoteDTO } from './dto/edit-note.dto';
-import { Note } from './interfaces/note.interface';
-import { Reply } from './interfaces/reply.interface';
+import { InjectModel } from '@nestjs/mongoose';
+import { CreateNoteDTO, newNote } from './dto/create-note.dto';
+import { Note, NoteDocument } from './schemas/note.schema';
+import { Model } from 'mongoose';
 
 @Injectable()
 export class NotesService {
-  private readonly notes: Note[] = [];
+  constructor(@InjectModel(Note.name) private noteModel: Model<NoteDocument>) {}
 
-  create(createNoteDTO: CreateNoteDTO) {
-    const note = {
-      id: randomUUID(),
-      content: createNoteDTO.content,
-      created_at: Date.now(),
-      upvotes: 0,
-      replies: [],
-    };
+  async create(createNoteDTO: CreateNoteDTO): Promise<Note> {
+    const note = newNote(createNoteDTO)
+    const createdNote = new this.noteModel(note)
 
-    this.notes.push(note);
+    return createdNote.save()
   }
 
-  findAll(): Note[] {
-    return this.notes;
+  async findAll(): Promise<Note[]> {
+    return this.noteModel.find().exec()
   }
 
-  findOne(noteId: string): Note {
-    return this.notes.find((note) => note.id == noteId);
+  async findOne(noteId: string): Promise<Note> {
+    return this.noteModel.findById(noteId).exec();
   }
 
-  addReply(noteId: string, editNoteDto: EditNoteDTO) {
-    const reply = {
-      id: randomUUID(),
-      text: editNoteDto.reply,
-      upvotes: 0,
-      replies: [],
-    };
+  async addReply(noteId: string, createNoteDTO: CreateNoteDTO) : Promise<Note>{
+    const reply = newNote(createNoteDTO)
+    // let note = (await this.noteModel.findById(noteId).exec())
 
-    var foundIndext = this.notes.findIndex((note) => note.id == noteId);
-    this.notes[foundIndext].replies.push(reply);
+    return this.noteModel.findByIdAndUpdate(noteId, {
+       $push: {replies: reply}
+    })
   }
+
 }
